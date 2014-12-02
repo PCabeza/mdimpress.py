@@ -1,20 +1,12 @@
 #! /usr/bin/python
 
-'''
-TODO: Add metada blocks
-
-% title: asdfds
-% author: asfsd
-% description: asddsf
-'''
-
 import argparse, re, codecs, sys, os, tempfile
 from os.path import splitext
 from subprocess import Popen,PIPE
 
 MD_HTML_RE = r"\[(?P<text>.*?)(?<!\\)\]<(?P<tag>.*?)>" # uses 'text' and 'tag' groups
 HTML_ELEMENT = r'<%(tag)s %(attr)s>%(body)s</%(tag)s>'
-STYLESHEET = r'<link rel="stylesheet/%(type)s" type="text/css" href="%(href)s"/>'
+STYLESHEET = r'<link rel="stylesheet%(type)s" type="text/css" href="%(href)s"/>'
 
 PANDOC_CALL = ["pandoc", "-t","html5","--section-divs", "-s"]
 TAGATTR_RE = re.compile(r'(.+?)=(.*)')
@@ -123,6 +115,42 @@ METADATA = {
 }
 
 
+def header_args_parse(md):
+    '''Parses a special header block from markdown file.
+    The header block has the form of:
+
+    	%% [master_arg]
+    	% arg_key: arg_value
+
+    Several header blocks can be given in series. It must be the
+    firsts elements of the markdown file.
+    
+    If master_arg is give, the (key,value) pairs are used are
+    arguments of the master_arg, else key is the argument and value is
+    used as the argument value.
+    '''
+    state=None
+    args = []
+
+    lines = md.splitlines()
+    lno = 0
+    for l in lines:
+        l = l.strip()
+        if not l: 
+            lno+=1; continue
+        
+        if l[:2]=="%%": state=l[2:].strip() # new group
+    	elif l[0]=="%": # element
+            w = [i.strip() for i in l[1:].split(":",1)] # strip spaces
+            if state: args+= ['--%s'%state, 
+                              (lambda x: "%s%s"% (x[0], "="+(x[1]) if x[1] else ""))(w)]
+            else: args+=(lambda x: ['--%s'%x[0]]+([x[1]] if len(x)>1 else []))(w)
+            
+        else: break
+        lno+=1
+
+    return (os.linesep.join(lines[lno:]),args)
+
 if __name__=="__main__":
 
     # parse arguments
@@ -132,20 +160,19 @@ if __name__=="__main__":
 
     parser.add_argument('mdfile', nargs='?',help='markdown file to compile')
     parser.add_argument('--output-file','-o', nargs='?',help='save output to this file')
-    parser.add_argument('--stylesheet','-s',action='append', 
+    parser.add_argument('--stylesheet','-s',action='append', default=[],
                         help='path to stylesheets file to add')
     parser.add_argument('--self-contained','-S',action='store_true', 
                     help='include dependencies in output')
     parser.add_argument('--external-links','-e',action='store_false', 
                         dest='self_contained', 
                         help='force externals to not be included')
-    parser.add_argument('--meta','-m', action='append',
+    parser.add_argument('--meta','-m', action='append', default=[],
                         help="update metadata for the presentation, can be any of %s" % 
     				', '.join(METADATA.keys()))
     args = parser.parse_args()
-    print args
 
-
+    
     # Choose input file depending on parameters
     if args.mdfile: 
         with codecs.open(args.mdfile,mode="rd",encoding="utf-8") as f:
@@ -153,23 +180,27 @@ if __name__=="__main__":
     else: input_file = sys.stdin.read().decode('utf-8')
 
 
-    METADATA.update(m.split('=',1) for m in args.meta)     # process metadata
+    # Reparse arguments using headers from markdown file
+    input_file, header_args =  header_args_parse(input_file)
+    args =  parser.parse_args(header_args+sys.argv[1:])
+
+    METADATA.update(m.split('=',1) for m in args.meta) # process metadata
 
 
     # Build extra arguments for pandoc call
     if args.self_contained: PANDOC_CALL+=["--self-contained"]
     PANDOC_CALL += ["-V","base-url=%s" % BASE_PATH ] # template folder
 
-
+    # TODO: fix, for css, just stylesheet; for less, stylesheet/less
     template_args = {
         # stylesheet elements
         'stylesheets': ''.join(
-            [ STYLESHEET % {'type':splitext(s)[1][1:], 'href': s} for s in args.stylesheet])
+            [ STYLESHEET % {'type':(lambda x: "/"+x if x=="less" else "")(splitext(s)[1][1:]), 'href': s} for s in args.stylesheet])
     }
     template_args.update(METADATA)
 
     temp_template = None    
-    with tempfile.NamedTemporaryFile(mode='wb',delete=False) as template:
+    with tempfile.NamedTemporaryFile(mode='wb',delete=False,suffix=".html") as template:
         temp_template = template.name
         with open(TEMPLATE_FILE, 'r') as orig:
             template.write(orig.read() % template_args)
