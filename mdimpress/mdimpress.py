@@ -12,6 +12,7 @@ STYLESHEET = r'<link rel="stylesheet%(type)s" type="text/css" href="%(href)s"/>'
 PANDOC_CALL = ["pandoc", "-t","html5","--section-divs", "-s"]
 TAGATTR_RE = re.compile(r'(.+?)=(.*)')
 TRANSLATE_RE = re.compile(r'(?P<header_brace>#.*?\{)(?P<braces>.*?)\}')
+TRANSLATE_RE_SUB = r'\g<header_brace>%(braces)s}'
 HEADER_LEVEL = 1 # to which header level append .step automatically
 
 def translation(match):
@@ -60,24 +61,33 @@ def translation_process(md):
     It also appends .step to headers automatically (only those that have {})
     '''
     table = [(re.compile(i[0]),i[1]) for i in TRANSLATION_TABLE]
-    
+    mdl = []
+
     for l in md.splitlines():
         m = TRANSLATE_RE.match(l)
-        if not m: continue
+        if not m: 
+            mdl.append(l); continue
+
+        braces = m.group('braces') # new brace value to update
 
         # TODO: as for now {} is compulsory, or .step wont be added
         # add .step to header
         if m.group('header_brace')[HEADER_LEVEL]!= "#" and \
            reduce(lambda b,a: (a=="#") and b,m.group('header_brace')[:HEADER_LEVEL],True):
             print m.group(0)
-            md = md.replace(m.group('header_brace'),m.group('header_brace')+" .step ")
+            braces = ".step " + braces
 
         for r in table:
-            m1=r[0].search(m.group('braces'))
-            if m1:
-                # print r,m1.groups()
-                md = md.replace(m1.group(0)," %s " % r[1](m1))
-    return md
+            braces = r[0].sub(lambda f: " %s " % r[1](f),braces)
+            # m1=r[0].search(m.group('braces'))
+            # if m1:
+            #     # print r,m1.groups()
+            #     md = md.replace(m1.group(0)," %s " % r[1](m1))
+
+        mdl.append(TRANSLATE_RE.sub(TRANSLATE_RE_SUB % {'braces': braces}, l))
+        print braces
+
+    return os.linesep.join(mdl)
 
 
 def parsetag(gr):
@@ -164,8 +174,7 @@ def header_args_parse(md):
 
     return (os.linesep.join(lines[lno:]),args)
 
-if __name__=="__main__":
-
+def main():
     # parse arguments
     parser = argparse.ArgumentParser(description=''' 
     		Utility that extends pandoc markdown syntax to easy creation of
@@ -244,3 +253,6 @@ if __name__=="__main__":
     if args.output_file: output_file = open(args.output_file,mode="w")
 
     output_file.write(out[0])
+
+if __name__=="__main__":
+    main()
