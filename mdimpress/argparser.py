@@ -27,7 +27,7 @@ class MdArgumentParser(argparse.ArgumentParser):
     def __init__(self):
         argparse.ArgumentParser.__init__(self,**MdArgumentParser.construction)
         for arg in MdArgumentParser.args:
-            print arg
+            # print arg
             flags = arg.get('flags',[])
             if flags: del arg['flags']
             self.add_argument(*flags,**arg)

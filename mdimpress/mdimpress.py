@@ -4,6 +4,7 @@ import argparse, re, codecs, sys, os, tempfile
 from os.path import splitext
 from subprocess import Popen,PIPE
 from distutils.dir_util import copy_tree
+#from mdimpress import get_data
 
 MD_HTML_RE = r"\[(?P<text>.*?)(?<!\\)\]<(?P<tag>.*?)>" # uses 'text' and 'tag' groups
 HTML_ELEMENT = r'<%(tag)s %(attr)s>%(body)s</%(tag)s>'
@@ -39,10 +40,6 @@ TRANSLATION_TABLE=(
     (r'(?:^| )zoom=(.*?)(?:$| )', lambda m: "data-scale=%s" % m.group(1)),
 )
 
-BASE_PATH = os.path.dirname(os.path.realpath(__file__))
-TEMPLATE_PATH = os.path.join(BASE_PATH,"template")
-TEMPLATE_FILE = os.path.join(TEMPLATE_PATH,"impress-template.html")
-GRUNT_DIR = os.path.join(BASE_PATH,"grunt")
 
 def translation_process(md):
     '''
@@ -74,7 +71,6 @@ def translation_process(md):
         # add .step to header
         if m.group('header_brace')[HEADER_LEVEL]!= "#" and \
            reduce(lambda b,a: (a=="#") and b,m.group('header_brace')[:HEADER_LEVEL],True):
-            print m.group(0)
             braces = ".step " + braces
 
         for r in table:
@@ -85,7 +81,7 @@ def translation_process(md):
             #     md = md.replace(m1.group(0)," %s " % r[1](m1))
 
         mdl.append(TRANSLATE_RE.sub(TRANSLATE_RE_SUB % {'braces': braces}, l))
-        print braces
+        # print braces
 
     return os.linesep.join(mdl)
 
@@ -176,7 +172,8 @@ def header_args_parse(md):
 
 
 from .argparser import MdArgumentParser
-def main():
+def main(PATHS):
+    global PANDOC_CALL
     # parse arguments
     # parser = argparse.ArgumentParser(description=''' 
     #       Utility that extends pandoc markdown syntax to easy creation of
@@ -197,11 +194,11 @@ def main():
     # parser.add_argument('--presentation-start',action="store_true", 
     #                     help="creates grunt devstack structure for mdimpress")
     #    args = parser.parse_args()
-    args = MdArgumentParser().parse_args()
-
+    parser = MdArgumentParser()
+    args = parser.parse_args()
 
     if args.presentation_start: # initialize presentation grunt devstack
-        copy_tree(GRUNT_DIR,os.getcwd())
+        copy_tree(PATHS['GRUNT_DIR'],os.getcwd())
         exit(0)
     
 
@@ -221,7 +218,7 @@ def main():
 
     # Build extra arguments for pandoc call
     if args.self_contained: PANDOC_CALL+=["--self-contained"]
-    PANDOC_CALL += ["-V","base-url=%s" % TEMPLATE_PATH ] # template folder
+    PANDOC_CALL += ["-V","base-url=%s" % PATHS['TEMPLATE_PATH'] ] # template folder
 
     # TODO: fix, for css, just stylesheet; for less, stylesheet/less
     template_args = {
@@ -234,7 +231,7 @@ def main():
     temp_template = None    
     with tempfile.NamedTemporaryFile(mode='wb',delete=False,suffix=".html") as template:
         temp_template = template.name
-        with open(TEMPLATE_FILE, 'r') as orig:
+        with open(PATHS['TEMPLATE_FILE'], 'r') as orig:
             template.write(orig.read() % template_args)
     
     PANDOC_CALL += ["--template", temp_template] # Template file is compulsory

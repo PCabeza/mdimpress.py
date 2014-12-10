@@ -9,6 +9,10 @@ import codecs
 from setuptools import setup
 from setuptools.command.install import install
 
+# import glob,os
+
+# GRUNTFILES = filter(os.path.isfile,glob.glob('./grunt/*'))
+# TEMPLATEFILES = filter(os.path.isfile,glob.glob('./template/*'))
 
 setup(
     name='mdimpress.py',
@@ -21,6 +25,7 @@ setup(
     #long_description=read("README.md"),
     #url='http://www.geeknote.me',
     packages=['mdimpress'],
+    package_data ={'mdimpress': ['data/grunt/*','data/template/*']},
 
 
     # classifiers=[
@@ -40,7 +45,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'mdimpress = mdimpress.mdimpress:main',
+            'mdimpress = mdimpress:main',
         ]
     },
 #    cmdclass={
