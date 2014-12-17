@@ -19,7 +19,8 @@ class MdArgumentParser(argparse.ArgumentParser):
         {'flags':['--external-links','-e'],'action':'store_false', 'dest':'self_contained', 
          'help':'force externals to not be included'},
         {'flags':['--meta','-m'], 'action':'append', 'default':[],
-         'help':"update metadata for the presentation, can be any of %s" % ', '.join(METADATA.keys())},
+         'help':"update metadata for the presentation, can be any of %s" % 
+         ' or '.join([', '.join(METADATA.keys()[:-1]),METADATA.keys()[-1]])},
         {'flags':['--presentation-start'],'action':"store_true", 
          'help':"creates grunt devstack structure for mdimpress"},
     ]

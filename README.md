@@ -23,7 +23,7 @@ weren't readable.
 In pandoc you can write headings that when rendered to html includes
 the specified id, classes and attributes into its node. For writing
 presentations this means you have to write many `data-x=number` or
-`data- rotate-z=number` attributes, for example:
+`data-rotate-z=number` attributes, for example:
 	
 	# some heading {.step data-x=1000 data-y=-250 data-rotate-y=90 data-scale=1.5}
 
@@ -112,9 +112,13 @@ and less verbose.
 `tag` is optional, if omitted `span` is used, but can be any.
 
 
+# Future features
+
+- Relative translations and rotations
 
 [pandoc_impress]: <https://github.com/jgm/pandoc/wiki/Creating-impress.js-slide-shows-with-pandoc>
 
 [grunt_livereload]: <https://github.com/gruntjs/grunt-contrib-watch#optionslivereload>
 [extensions_livereload]: <http://feedback.livereload.com/knowledgebase/articles/86242-how-do-i-install-and-use-the-browser-extensions>
  
+
