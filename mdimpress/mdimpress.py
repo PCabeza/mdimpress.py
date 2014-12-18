@@ -139,29 +139,10 @@ def header_args_parse(md):
     return (os.linesep.join(lines[lno:]),args)
 
 
-from .argparser import MdArgumentParser
 def main(PATHS):
     global PANDOC_CALL
-    # parse arguments
-    # parser = argparse.ArgumentParser(description=''' 
-    #       Utility that extends pandoc markdown syntax to easy creation of
-    #       impress.js presentations using pandoc utility.''')
 
-    # parser.add_argument('mdfile', nargs='?',help='markdown file to compile')
-    # parser.add_argument('--output-file','-o', nargs='?',help='save output to this file')
-    # parser.add_argument('--stylesheet','-s',action='append', default=[],
-    #                     help='path to stylesheets file to add')
-    # parser.add_argument('--self-contained','-S',action='store_true', 
-    #                 help='include dependencies in output')
-    # parser.add_argument('--external-links','-e',action='store_false', 
-    #                     dest='self_contained', 
-    #                     help='force externals to not be included')
-    # parser.add_argument('--meta','-m', action='append', default=[],
-    #                     help="update metadata for the presentation, can be any of %s" % 
-    #               ', '.join(METADATA.keys()))
-    # parser.add_argument('--presentation-start',action="store_true", 
-    #                     help="creates grunt devstack structure for mdimpress")
-    #    args = parser.parse_args()
+    from .argparser import MdArgumentParser
     parser = MdArgumentParser()
     args = parser.parse_args()
 

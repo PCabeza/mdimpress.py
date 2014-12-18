@@ -4,10 +4,21 @@ The idea behind it is to create a tool that allows a fluid workflow
 when creating impress.js based presentations, while retaining full
 control over the html and css code.
 
-Based in this [page][pandoc_impress] from the pandoc wiki you can
+Based in [this page][pandoc_impress] from the pandoc wiki you can
 already use markdown to build a simple presentation, but I wanted to
 optimize the process, because the markdown files created this way
-weren't readable.
+weren't readable, and the workflow was too slow.
+
+# How to use
+
+You can use it to compile a markdown file. When using it with no
+options, the generated output will have no style. To add an stylesheet
+use the `--stylesheet` flag.
+
+This an inconvenient way to develop, so the flag
+`--presentation-start` creates in the current directory an empty grunt
+project. Grunt executes mdimpress, compiles .less files and watchs for
+changes and reports them using livereload.
 
 # Features
 
@@ -115,6 +126,7 @@ and less verbose.
 # Future features
 
 - Relative translations and rotations
+- `.nostep` attribute to skip a top level step
 
 [pandoc_impress]: <https://github.com/jgm/pandoc/wiki/Creating-impress.js-slide-shows-with-pandoc>
 
