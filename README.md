@@ -9,7 +9,7 @@ already use markdown to build a simple presentation, but I wanted to
 optimize the process, because the markdown files created this way
 weren't readable, and the workflow was too slow.
 
-# How to use
+## How to use ##
 
 You can use it to compile a markdown file. When using it with no
 options, the generated output will have no style. To add an stylesheet
@@ -20,7 +20,7 @@ This an inconvenient way to develop, so the flag
 project. Grunt executes mdimpress, compiles .less files and watchs for
 changes and reports them using livereload.
 
-# Features
+## Features ##
 
 - [x] Extensions of headings `{}` pandoc syntax.
 - [x] Append automatically .step to header `{}` blocks.
@@ -29,7 +29,7 @@ changes and reports them using livereload.
 - [x] Header block syntax to pass arguments to mdimpress.py from the
   markdown file.
 
-# Extension of headings syntax
+## Extension of headings syntax ##
 
 In pandoc you can write headings that when rendered to html includes
 the specified id, classes and attributes into its node. For writing
@@ -76,7 +76,7 @@ impress.js).
 This is just a shortcut for `data-scale=n`, uses fewer letters and is easy to
 remember.
 
-# Header block
+## Header block ##
 
 To not pass all arguments to mdimpress.py you can write a *header block*. This
 block is composed of arguments as obtained from `mdimpres.py -h`, in the long
@@ -87,7 +87,7 @@ more than one header block, but all must appear before any non-blank, non %
 prefixed line. The arguments defined in header blocks can be overridden by
 command-line options.
 
-## Anonymous header block
+### Anonymous header block ###
 
 They have the form of:
 
@@ -99,7 +99,7 @@ This will be roughly the same as calling the program with `--argument1
 --argument2 value`
 
 
-## Prefixed header block
+### Prefixed header block ###
 
 	%% arg
 	% key1: value1
@@ -110,9 +110,9 @@ This will be translated to `--arg key1=value1 --arg key2=value2 --arg key3`.
 This block is useful when including many stylesheets or for defining metadata.
 
 
-# Extension of pandoc markdown syntax
+## Extension of pandoc markdown syntax ##
 
-## inline html elements
+### inline html elements ###
 
 **Syntax**: `[text]<[tag] #id .class attr1=val1>`
 
@@ -123,7 +123,7 @@ and less verbose.
 `tag` is optional, if omitted `span` is used, but can be any.
 
 
-# Future features
+## Future features ##
 
 - Relative translations and rotations
 - `.nostep` attribute to skip a top level step

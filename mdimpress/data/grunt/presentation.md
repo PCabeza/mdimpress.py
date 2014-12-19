@@ -2,9 +2,10 @@
 % author: John Doe
 % title: Presentation
 % description: An example of presentation
+%% stylesheet
+% impress-demo.css
+% style.css
 %%
-% stylesheet: impress-demo.css
-% stylesheet: style.css
 % output-file: presentation.html
 
 

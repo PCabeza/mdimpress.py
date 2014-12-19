@@ -130,7 +130,7 @@ def header_args_parse(md):
     	elif l[0]=="%": # element
             w = [i.strip() for i in l[1:].split(":",1)] # strip spaces
             if state: args+= ['--%s'%state, 
-                              (lambda x: "%s%s"% (x[0], "="+(x[1]) if x[1] else ""))(w)]
+                              (lambda x: "%s%s"% (x[0], "="+(x[1]) if len(x)>1 else ""))(w)]
             else: args+=(lambda x: ['--%s'%x[0]]+([x[1]] if len(x)>1 else []))(w)
             
         else: break

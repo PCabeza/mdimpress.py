@@ -18,7 +18,11 @@ setup(
     description='mdimpress.py is a command and framework for building '
                 'presentations from markdown based on impess.js',
     packages=['mdimpress'],
-    package_data ={'mdimpress': ['data/grunt/*','data/template/*']},
+    package_data ={'mdimpress': [
+    'data/grunt/*.*',
+    'data/grunt/css/*',
+    'data/grunt/less/*',
+    'data/template/*']},
 
 
     entry_points={
