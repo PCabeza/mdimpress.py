@@ -13,20 +13,21 @@ weren't readable, and the workflow was too slow.
 
 You can use it to compile a markdown file. When using it with no
 options, the generated output will have no style. To add an stylesheet
-use the `--stylesheet` flag.
+use the `--stylesheet` flag. There are more options to customize
+output, use `-h` to see all of them.
 
 This an inconvenient way to develop, so the flag
 `--presentation-start` creates in the current directory an empty grunt
-project. Grunt executes mdimpress, compiles .less files and watchs for
-changes and reports them using livereload.
+project. Grunt executes mdimpress, compiles .less files and watches for
+changes and reports them using livereload. 
 
 ## Features ##
 
-- [x] Extensions of headings `{}` pandoc syntax.
-- [x] Append automatically .step to header `{}` blocks.
-- [x] Extension of markdown semantic syntax.
-- [ ] Metadata included into generated html.
-- [x] Header block syntax to pass arguments to mdimpress.py from the
+- Extensions of headings `{}` pandoc syntax for impress.js.
+- Append automatically `.step` to header `{}` blocks.
+- Extension of markdown semantic syntax.
+- Metadata included into generated html.
+- Header block syntax to pass arguments to mdimpress.py from the
   markdown file.
 
 ## Extension of headings syntax ##
@@ -128,9 +129,14 @@ and less verbose.
 - Relative translations and rotations
 - `.nostep` attribute to skip a top level step
 
+## TODO
+
+- Build some kind of modular parser for {} and other syntax translations
+
 [pandoc_impress]: <https://github.com/jgm/pandoc/wiki/Creating-impress.js-slide-shows-with-pandoc>
 
 [grunt_livereload]: <https://github.com/gruntjs/grunt-contrib-watch#optionslivereload>
+
 [extensions_livereload]: <http://feedback.livereload.com/knowledgebase/articles/86242-how-do-i-install-and-use-the-browser-extensions>
  
 
