@@ -1,8 +1,18 @@
 module.exports = function(grunt) {
+    var MDCALL = "mdimpress {0}";
+
+    /// Utility function to emulate python '{0}'.format(a)
+    String.prototype.format=function(){
+        var cp = new String(this);
+        for(var i=0 ; i<arguments.length ; i++)
+            cp=cp.replace('{'+i+'}',arguments[i]);
+        return cp;
+    }
+
     grunt.initConfig({
         less: {
             mdimpress: {
-                files: [{ expand: true, 
+                files: [{ expand: true,
 			  cwd: "less/",
 			  src: ["*.less"],
 			  dest: "css/",
@@ -11,9 +21,10 @@ module.exports = function(grunt) {
         },
         exec: {
             mdimpress: {
-                cmd: function() { // call mdimpress.py with first .md file found in current folder
+                // call mdimpress.py with first .md file found in current folder
+                cmd: function() {
                     var f = grunt.file.expand({matchBase:false},"*.md");
-                    if(f.length>0) return "mdimpress "+f[0];
+                    if(f.length>0) return MDCALL.format(f[0]);
                 },
             }
         },
@@ -35,5 +46,5 @@ module.exports = function(grunt) {
     });
 
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
-    grunt.registerTask('default',['exec','less','watch']);    
+    grunt.registerTask('default',['exec','less','watch']);
 };
