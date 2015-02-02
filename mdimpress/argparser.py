@@ -23,6 +23,9 @@ class MdArgumentParser(argparse.ArgumentParser):
          ' or '.join([', '.join(METADATA.keys()[:-1]),METADATA.keys()[-1]])},
         {'flags':['--presentation-start'],'action':"store_true", 
          'help':"creates grunt devstack structure for mdimpress"},
+        {'flags':['--debug'],'action':"store_true",
+         'help':"sets debug output"},
+
     ]
 
     def __init__(self):

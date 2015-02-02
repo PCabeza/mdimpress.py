@@ -19,7 +19,7 @@ output, use `-h` to see all of them.
 This an inconvenient way to develop, so the flag
 `--presentation-start` creates in the current directory an empty grunt
 project. Grunt executes mdimpress, compiles .less files and watches for
-changes and reports them using livereload. 
+changes and reports them using livereload.
 
 ## Features ##
 
@@ -36,7 +36,7 @@ In pandoc you can write headings that when rendered to html includes
 the specified id, classes and attributes into its node. For writing
 presentations this means you have to write many `data-x=number` or
 `data-rotate-z=number` attributes, for example:
-	
+
 	# some heading {.step data-x=1000 data-y=-250 data-rotate-y=90 data-scale=1.5}
 
 Using the mdimpress.py syntax this will be written as:
@@ -58,7 +58,7 @@ When there is a first level header block, a `.step` class will added. This means
 
 Any subset of `xyz` can be used, in any order, the coordinates and numbers
 will be matched in the order given. This means you can write, for example,
-`zy=(c,b)`. 
+`zy=(c,b)`.
 
 Parenthesis are optional.
 
@@ -131,12 +131,12 @@ and less verbose.
 
 ## TODO
 
-- Build some kind of modular parser for {} and other syntax translations
+- [ ] Build some kind of modular parser for {} and other syntax translations
+- [ ] Add livereload support inline for template (adding <script> element)
+- [ ] Add cleanup to grunt template    
 
 [pandoc_impress]: <https://github.com/jgm/pandoc/wiki/Creating-impress.js-slide-shows-with-pandoc>
 
 [grunt_livereload]: <https://github.com/gruntjs/grunt-contrib-watch#optionslivereload>
 
 [extensions_livereload]: <http://feedback.livereload.com/knowledgebase/articles/86242-how-do-i-install-and-use-the-browser-extensions>
- 
-

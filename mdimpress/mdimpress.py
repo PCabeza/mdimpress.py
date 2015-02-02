@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import argparse, re, codecs, sys, os, tempfile
+import argparse, re, codecs, sys, os, tempfile, logging
 from os.path import splitext
 from subprocess import Popen,PIPE
 from distutils.dir_util import copy_tree
@@ -8,6 +8,7 @@ from distutils.dir_util import copy_tree
 from .constants import *
 
 
+logger = logging.getLogger(__name__)
 
 def translation_process(md):
     '''
@@ -28,11 +29,12 @@ def translation_process(md):
     table = [(re.compile(i[0]),i[1]) for i in TRANSLATION_TABLE]
     mdl = []
 
-    for l in md.splitlines():
+    for i,l in enumerate(md.splitlines()):
         m = TRANSLATE_RE.match(l)
         if not m: 
             mdl.append(l); continue
 
+        logger.debug("Header match in line %i: %s" % (i,l)) 
         braces = m.group('braces') # new brace value to update
 
         # TODO: as for now {} is compulsory, or .step wont be added
@@ -41,14 +43,17 @@ def translation_process(md):
            reduce(lambda b,a: (a=="#") and b,m.group('header_brace')[:HEADER_LEVEL],True):
             braces = ".step " + braces
 
+        # TODO: parse tokens
         for r in table:
             braces = r[0].sub(lambda f: " %s " % r[1](f),braces)
             # m1=r[0].search(m.group('braces'))
             # if m1:
             #     # print r,m1.groups()
             #     md = md.replace(m1.group(0)," %s " % r[1](m1))
-
-        mdl.append(TRANSLATE_RE.sub(TRANSLATE_RE_SUB % {'braces': braces}, l))
+        
+        transd = TRANSLATE_RE.sub(TRANSLATE_RE_SUB % {'braces': braces}, l)
+        logger.debug('after translation: %s' % transd)
+        mdl.append(transd)
         # print braces
 
     return os.linesep.join(mdl)
@@ -75,7 +80,7 @@ def parsetag(gr):
             r = TAGATTR_RE.match(w)
             if r: attr[r.group(1)] = attr.get(r.group(1),[])+[r.group(2)]
             else: tag = w
-        
+    logging.debug("parsed tag %s, found %s" % (gr,attr))
     return tag, ' '.join(['%s=%s'%(k,' '.join(v)) for k,v in attr.iteritems()])
 
 def elementclass(md):
@@ -150,6 +155,7 @@ def main(PATHS):
         copy_tree(PATHS['GRUNT_DIR'],os.getcwd())
         exit(0)
     
+            
 
     # Choose input file depending on parameters
     if args.mdfile: 
@@ -163,7 +169,9 @@ def main(PATHS):
     args =  parser.parse_args(header_args+sys.argv[1:])
 
     METADATA.update(m.split('=',1) for m in args.meta) # process metadata
-
+    
+    # set logger level
+    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
 
     # Build extra arguments for pandoc call
     if args.self_contained: PANDOC_CALL+=["--self-contained"]
