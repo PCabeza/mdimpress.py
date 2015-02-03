@@ -1,5 +1,5 @@
 import os
-import mdimpress
+from .mdimpress import main as md_main
 import logging, sys
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -22,4 +22,6 @@ ch = logging.StreamHandler(sys.stdout)
 logger.addHandler(ch)
 
 
-def main(): mdimpress.main(PATHS)
+def main(): md_main(PATHS)
+
+if __name__ == "__main__": main()
