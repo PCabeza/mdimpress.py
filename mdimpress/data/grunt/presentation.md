@@ -3,7 +3,7 @@
 % title: Presentation
 % description: An example of presentation
 %% stylesheet
-% impress-demo.css
+% impress-demo.min.css
 % style.css
 %%
 % output-file: presentation.html
