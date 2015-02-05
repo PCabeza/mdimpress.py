@@ -144,15 +144,39 @@ def header_args_parse(md):
     return (os.linesep.join(lines[lno:]),args)
 
 
+def presentation_start(PATHS):
+    copy_tree(PATHS['GRUNT_DIR'],os.getcwd())
+    exit(0)
+
+
+def compile(args, input, output,PATHS):
+    # TODO: fix, for css, just stylesheet; for less, stylesheet/less
+    template_args = {
+        # stylesheet elements
+        'stylesheets': ''.join(
+            [ STYLESHEET % {'type':(lambda x: "/"+x if x=="less" else "")(splitext(s)[1][1:]), 'href': s} for s in args.stylesheet])
+    }
+    template_args.update(METADATA)
+
+
+    # process input to preparse it
+    preprocessed = translation_process(input)
+    preprocessed = elementclass(preprocessed)
+
+   
+    pandoc = Pandoc(template_args,PATHS['TEMPLATE_FILE'],PATHS['TEMPLATE_PATH'])
+    if args.self_contained: pandoc.selfContained()
+    
+    pandoc.call(preprocessed,output)
+
+
 def main(PATHS):
     from .argparser import MdArgumentParser
     parser = MdArgumentParser()
     args = parser.parse_args()
 
-    if args.presentation_start: # initialize presentation grunt devstack
-        copy_tree(PATHS['GRUNT_DIR'],os.getcwd())
-        exit(0)
-
+    # initialize presentation grunt devstack
+    if args.presentation_start: presentation_start(PATHS)
 
 
     # Choose input file depending on parameters
@@ -165,35 +189,19 @@ def main(PATHS):
     input_file, header_args =  header_args_parse(input_file)
     args =  parser.parse_args(header_args+sys.argv[1:])
 
-    METADATA.update(m.split('=',1) for m in args.meta) # process metadata
 
     # set logger level
     logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
 
-    # TODO: fix, for css, just stylesheet; for less, stylesheet/less
-    template_args = {
-        # stylesheet elements
-        'stylesheets': ''.join(
-            [ STYLESHEET % {'type':(lambda x: "/"+x if x=="less" else "")(splitext(s)[1][1:]), 'href': s} for s in args.stylesheet])
-    }
-    template_args.update(METADATA)
 
+    # use args to update metadata
+    METADATA.update(m.split('=',1) for m in args.meta) # process metadata
 
-    # process input to preparse it
-    preprocessed = translation_process(input_file)
-    preprocessed = elementclass(preprocessed)
-
-
+    # select output stream
     output_file = sys.stdout
     if args.output_file: output_file = open(args.output_file,mode="w")
 
-    # Build extra arguments for pandoc call
-    # extra_pandoc_args = ["-V","base-url=%s" % PATHS['TEMPLATE_PATH'] ] 
-    
-    pandoc = Pandoc(template_args,PATHS['TEMPLATE_FILE'],PATHS['TEMPLATE_PATH'])
-    if args.self_contained: pandoc.selfContained()
-    
-    pandoc.call(preprocessed,output_file)
+    compile(args,input_file,output_file,PATHS)
 
 
 if __name__=="__main__":
