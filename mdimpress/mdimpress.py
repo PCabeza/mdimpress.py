@@ -95,10 +95,11 @@ def elementclass(md):
     finds = re.finditer(MD_HTML_RE,md)
     for i in list(finds):
         tag, attr = parsetag(i.group('tag'))
-        md = md.replace(i.group(0),
-                            HTML_ELEMENT % {"tag":tag, "attr":attr,
-                                            "body":i.group('text')})
-    return md
+        element = HTML_ELEMENT % {"tag":tag, "attr":attr,
+                                            "body":i.group('text')}
+        md = md.replace(i.group(0), element)
+        logger.debug("replaced %s for %s" % (i.group(0),element))
+    return md 
 
 METADATA = {
     'title': "",
@@ -141,6 +142,7 @@ def header_args_parse(md):
         else: break
         lno+=1
 
+    logger.debug("parsed header block up to line %d, found %s" % (lno,args))
     return (os.linesep.join(lines[lno:]),args)
 
 

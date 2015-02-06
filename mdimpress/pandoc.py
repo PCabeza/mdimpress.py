@@ -1,5 +1,7 @@
-import tempfile, os
+import tempfile, os, logging
 from subprocess import Popen, PIPE
+
+logger = logging.getLogger(__name__)
 
 class Pandoc(object):
 
@@ -37,5 +39,7 @@ class Pandoc(object):
         with open(self.orig_template, 'r') as orig:
             template.write((orig.read().decode('utf-8') % targs).encode('utf-8'))
             template.flush()
+
+        logger.info("pandoc template written to %s" % template.name)
 
         return template
