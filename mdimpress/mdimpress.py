@@ -5,8 +5,9 @@ from os.path import splitext
 from subprocess import Popen,PIPE
 from distutils.dir_util import copy_tree
 
-from .constants import *
+from .translator import *
 from .pandoc import Pandoc
+from . import constants
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ def translation_process(md):
     mdl = []
 
     for i,l in enumerate(md.splitlines()):
-        m = TRANSLATE_RE.match(l)
+        m = constants.TRANSLATE_RE.match(l)
         if not m:
             mdl.append(l); continue
 
@@ -39,8 +40,8 @@ def translation_process(md):
 
         # TODO: as for now {} is compulsory, or .step wont be added
         # add .step to header
-        if m.group('header_brace')[HEADER_LEVEL]!= "#" and \
-           reduce(lambda b,a: (a=="#") and b,m.group('header_brace')[:HEADER_LEVEL],True):
+        if m.group('header_brace')[constants.HEADER_LEVEL]!= "#" and \
+           reduce(lambda b,a: (a=="#") and b,m.group('header_brace')[:constants.HEADER_LEVEL],True):
             braces = ".step " + braces
 
         # TODO: parse tokens
@@ -51,7 +52,7 @@ def translation_process(md):
             #     # print r,m1.groups()
             #     md = md.replace(m1.group(0)," %s " % r[1](m1))
 
-        transd = TRANSLATE_RE.sub(TRANSLATE_RE_SUB % {'braces': braces}, l)
+        transd = constants.TRANSLATE_RE.sub(constants.TRANSLATE_RE_SUB % {'braces': braces}, l)
         logger.debug('after translation: %s' % transd)
         mdl.append(transd)
         # print braces
@@ -77,7 +78,7 @@ def parsetag(gr):
         elif w[0]==".": attr["class"] = attr.get("class",[])+[w[1:]]
 
 	else:
-            r = TAGATTR_RE.match(w)
+            r = constants.TAGATTR_RE.match(w)
             if r: attr[r.group(1)] = attr.get(r.group(1),[])+[r.group(2)]
             else: tag = w
     logging.debug("parsed tag %s, found %s" % (gr,attr))
@@ -92,10 +93,10 @@ def elementclass(md):
     To elements of the form `<tag class="class">text</tag>`.
     If `tag` is not included, `span` will be used
     '''
-    finds = re.finditer(MD_HTML_RE,md)
+    finds = re.finditer(constants.MD_HTML_RE,md)
     for i in list(finds):
         tag, attr = parsetag(i.group('tag'))
-        element = HTML_ELEMENT % {"tag":tag, "attr":attr,
+        element = constants.HTML_ELEMENT % {"tag":tag, "attr":attr,
                                             "body":i.group('text')}
         md = md.replace(i.group(0), element)
         logger.debug("replaced %s for %s" % (i.group(0),element))
@@ -147,7 +148,7 @@ def header_args_parse(md):
 
 
 def presentation_start(PATHS):
-    copy_tree(PATHS['GRUNT_DIR'],os.getcwd())
+    copy_tree(constants.PATHS['GRUNT_DIR'],os.getcwd())
     exit(0)
 
 
@@ -156,7 +157,7 @@ def compile(args, input, output,PATHS):
     template_args = {
         # stylesheet elements
         'stylesheets': ''.join(
-            [ STYLESHEET % {'type':(lambda x: "/"+x if x=="less" else "")(splitext(s)[1][1:]), 'href': s} for s in args.stylesheet])
+            [ constants.STYLESHEET % {'type':(lambda x: "/"+x if x=="less" else "")(splitext(s)[1][1:]), 'href': s} for s in args.stylesheet])
     }
     template_args.update(METADATA)
 
@@ -166,19 +167,19 @@ def compile(args, input, output,PATHS):
     preprocessed = elementclass(preprocessed)
 
    
-    pandoc = Pandoc(template_args,PATHS['TEMPLATE_FILE'],PATHS['TEMPLATE_PATH'])
+    pandoc = Pandoc(template_args)
     if args.self_contained: pandoc.selfContained()
     
     pandoc.call(preprocessed,output)
 
 
-def main(PATHS):
+def main():
     from .argparser import MdArgumentParser
     parser = MdArgumentParser()
     args = parser.parse_args()
 
     # initialize presentation grunt devstack
-    if args.presentation_start: presentation_start(PATHS)
+    if args.presentation_start: presentation_start(constants.PATHS)
 
 
     # Choose input file depending on parameters
@@ -203,8 +204,5 @@ def main(PATHS):
     output_file = sys.stdout
     if args.output_file: output_file = open(args.output_file,mode="w")
 
-    compile(args,input_file,output_file,PATHS)
+    compile(args,input_file,output_file,constants.PATHS)
 
-
-if __name__=="__main__":
-    main()

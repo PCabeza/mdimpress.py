@@ -1,5 +1,6 @@
 import tempfile, os, logging
 from subprocess import Popen, PIPE
+from . import constants
 
 logger = logging.getLogger(__name__)
 
@@ -7,12 +8,12 @@ class Pandoc(object):
 
     CALL = ["pandoc", "-t","html5","--section-divs", "-s"]
 
-    def __init__(self,template_args,template,t_dir):
-        self.orig_template = template
+    def __init__(self,template_args):
+        self.orig_template = constants.PATHS['TEMPLATE_FILE']
         self.template = self.getTemplate(template_args)
 
         self.pandoc = Pandoc.CALL + ["--template", self.template.name] + \
-            ["-V","base-url=%s" % t_dir ] # baes-url pandoc variable
+            ["-V","base-url=%s" % constants.PATHS['TEMPLATE_PATH'] ] # baes-url pandoc variable
 
 
     def __del__(self):
