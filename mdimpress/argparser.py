@@ -1,5 +1,7 @@
 import argparse
-from .mdimpress import METADATA
+from .mdimpress import MDImpress 
+
+METADATA = MDImpress.METADATA
 
 class MdArgumentParser(argparse.ArgumentParser):
 

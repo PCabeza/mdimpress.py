@@ -28,7 +28,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'mdimpress = mdimpress.mdimpress:main',
+            'mdimpress = mdimpress.cli:main',
         ]
     },
 )

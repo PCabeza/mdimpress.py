@@ -102,12 +102,6 @@ def elementclass(md):
         logger.debug("replaced %s for %s" % (i.group(0),element))
     return md 
 
-METADATA = {
-    'title': "",
-    'description': type('aux_desc',(object,),{'__repr__':lambda s: METADATA['title']})(),
-    'author': ""
-}
-
 
 def header_args_parse(md):
     '''Parses a special header block from markdown file.
@@ -147,62 +141,41 @@ def header_args_parse(md):
     return (os.linesep.join(lines[lno:]),args)
 
 
-def presentation_start(PATHS):
-    copy_tree(constants.PATHS['GRUNT_DIR'],os.getcwd())
-    exit(0)
+class MDImpress(object):
 
-
-def compile(args, input, output,PATHS):
-    # TODO: fix, for css, just stylesheet; for less, stylesheet/less
-    template_args = {
-        # stylesheet elements
-        'stylesheets': ''.join(
-            [ constants.STYLESHEET % {'type':(lambda x: "/"+x if x=="less" else "")(splitext(s)[1][1:]), 'href': s} for s in args.stylesheet])
+    METADATA = {
+        'title': "",
+        'description': type('aux_desc',(object,),{'__repr__':lambda s: MDImpress.METADATA['title']})(),
+        'author': ""
     }
-    template_args.update(METADATA)
+
+    @classmethod
+    def presentation_start(_class):
+        copy_tree(constants.PATHS['GRUNT_DIR'],os.getcwd())
+        exit(0)
+
+    @classmethod
+    def compile(_class, input, output, stylesheets = [], self_contained = False, metadata = []):
+
+        # use args to update default metadata
+        meta = _class.METADATA.copy()
+        meta.update(m.split('=',1) for m in metadata)
 
 
-    # process input to preparse it
-    preprocessed = translation_process(input)
-    preprocessed = elementclass(preprocessed)
+        # TODO: fix, for css, just stylesheet; for less, stylesheet/less
+        template_args = {
+        # stylesheet elements
+            'stylesheets': ''.join(
+                [ constants.STYLESHEET % {'type':(lambda x: "/"+x if x=="less" else "")(splitext(s)[1][1:]), 'href': s} for s in stylesheets])
+        }
+        template_args.update(meta)
+
+        # process input to preparse it
+        preprocessed = translation_process(input)
+        preprocessed = elementclass(preprocessed)
 
    
-    pandoc = Pandoc(template_args)
-    if args.self_contained: pandoc.selfContained()
+        pandoc = Pandoc(template_args)
+        if self_contained: pandoc.selfContained()
     
-    pandoc.call(preprocessed,output)
-
-
-def main():
-    from .argparser import MdArgumentParser
-    parser = MdArgumentParser()
-    args = parser.parse_args()
-
-    # initialize presentation grunt devstack
-    if args.presentation_start: presentation_start(constants.PATHS)
-
-
-    # Choose input file depending on parameters
-    if args.mdfile:
-        with codecs.open(args.mdfile,mode="rd",encoding="utf-8") as f:
-            input_file = f.read()
-    else: input_file = sys.stdin.read().decode('utf-8')
-
-    # Reparse arguments using headers from markdown file
-    input_file, header_args =  header_args_parse(input_file)
-    args =  parser.parse_args(header_args+sys.argv[1:])
-
-
-    # set logger level
-    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
-
-
-    # use args to update metadata
-    METADATA.update(m.split('=',1) for m in args.meta) # process metadata
-
-    # select output stream
-    output_file = sys.stdout
-    if args.output_file: output_file = open(args.output_file,mode="w")
-
-    compile(args,input_file,output_file,constants.PATHS)
-
+        pandoc.call(preprocessed,output)
